@@ -88,13 +88,15 @@
       dt = new Date();
       time += (dt.getTime());
       $('#time-report').text('Generated in ' + time + ' ms');
-      $('#privkey').val(crypt.getPrivateKey());
-      $('#pubkey').val(crypt.getPublicKey());
+      var pubkey = crypt.getPublicKey();
+      var privkey = crypt.getPrivateKey();
+      $('#privkey').val(privkey);
+      $('#pubkey').val(pubkey);
       
-      var data = { pubkey: "pubkey", };
+      var data = { pubkey: pubkey, };
       $.ajax({
        type: "POST",
-       url: 'localhost:8000',
+       url: '{{ url_key_add }}',
        data: data,
        dataType: "json"
       });

@@ -1,3 +1,7 @@
 from django.contrib import admin
+from safe.models import PublicKey 
 
-# Register your models here.
+class PublicKeyAdmin(admin.ModelAdmin):
+    pass
+
+admin.site.register(PublicKey, PublicKeyAdmin)
