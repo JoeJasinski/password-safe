@@ -9,6 +9,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 
 from safe.models import PublicKey 
+from safe.forms import AddPublicKeyForm
+
 
 class JSONResponseMixin(object):
     def render_to_json_response(self, context, **response_kwargs):
@@ -48,9 +50,14 @@ class AddKeyView(JSONResponseMixin, TemplateView):
         return self.render_to_json_response(context, **response_kwargs)
 
     def post(self, request, *args, **kwargs):
-        user = request.user 
-        key, created = PublicKey.objects.get_or_create(user=user)
-        key.text = request.POST.get('pubkey')
-        key.save()
-        context = {'pubkey':key.text}
+        context = {}
+        form = AddPublicKeyForm(data=request.POST)
+        if form.is_valid():
+            user = request.user 
+            key, created = PublicKey.objects.get_or_create(user=user)
+            key.text = form.cleaned_data['pubkey']
+            key.save()
+            context.update({'pubkey':key.text})
+        else:
+            context.update({'errors':form.errors})
         return self.render_to_response(context)
