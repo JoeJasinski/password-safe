@@ -1,13 +1,7 @@
-<html>
-<head>
-  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.min.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}js/lawnchair-0.6.3/src/Lawnchair.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}js/lawnchair-0.6.3/src/adapters/dom.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}js/jsencrypt/bin/jsencrypt.min.js"></script>
-  <link href="{{ STATIC_URL }}css/bootstrap.min.css" rel="stylesheet" type="text/css">
+{% extends "safe/base.html" %}
 
-</head>
+
+{% block content %}
 <body>
   <button id="generate" class="btn btn-primary">Generate Keys</button><div id="time-report"></div>
   <div id="alert" style="display:none;">message</div>
@@ -16,10 +10,23 @@
 </body>
 
 <script type="text/javascript">
-  $(function () {
+$(function () {
 
     var pubkey =  "";
     var privkey = "";
+    var privatekey_storage =  new Lawnchair({name:'rsakeys'},  function(){ 
+       this.get('privkey', function(key) {
+           if (key) { privkey = key['privkey'] || "";
+             console.log('existence is: ' + key['privkey']);
+           }
+         });
+       this.get('pubkey', function(key) {
+           if (key) { privkey = key['pubkey'] || "";
+             console.log('existence is: ' + key['pubkey']);
+           }
+         });
+    });
+
 
     //Change the key size value for new keys
     $(".change-key-size").each(function (index, value) {
@@ -66,24 +73,13 @@
       }
     });
 
-    var privatekey_storage =  new Lawnchair({name:'rsakeys'},  function(){ 
-	
-	   this.get('privkey', function(key) {
-	       if (key) { privkey = key['privkey'] || "";
-             console.log('existence is: ' + key['privkey']);
-           }
-         });
-       this.get('pubkey', function(key) {
-           if (key) { privkey = key['pubkey'] || "";
-             console.log('existence is: ' + key['pubkey']);
-           }
-         });
+   // var privatekey_storage =  new Lawnchair({name:'rsakeys'},  function(){ 
         
 	    // If they wish to generate new keys.
 	    $('#generate').click(function () {
 	        
 	      var sKeySize = "2048";
-	      var sKeySize = "1024";
+	      //var sKeySize = "1024";
 	      var keySize = parseInt(sKeySize);
 	      crypt = new JSEncrypt({default_key_size: keySize});
 	      var async = true;
@@ -103,11 +99,6 @@
 		      pubkey = crypt.getPublicKey();
 		      privkey = crypt.getPrivateKey();
 	
-              privatekey_storage.save({key:'privkey', privkey:privkey});
-              privatekey_storage.save({key:'pubkey', pubkey:pubkey});
-		      $('#privkey').val(privkey);
-		      $('#pubkey').val(pubkey);
-		     
 		      var data = { pubkey: pubkey, };
 		      $.ajax({
 		       type: "POST",
@@ -119,6 +110,14 @@
                   //data - response from server
                   $("#alert").show( "fast", function() {
                       if(data.message) {
+                             var privatekey_storage =  new Lawnchair({name:'rsakeys'},  function(){ 
+                  
+                                 this.save({key:'privkey', privkey:privkey});
+                                 this.save({key:'pubkey', pubkey:pubkey});
+                                 $('#privkey').val(privkey);
+                                 $('#pubkey').val(pubkey);
+                              
+                             });
                             $( this ).html("Key Saved");
                        } else if( data.errors ) {
                             $( this ).html("Error with save " + data.errors);
@@ -144,9 +143,9 @@
 	      
 	    });
     
-    });
+    //});
     
     
-  });
+});
 </script>
-</html>
+{% endblock %}
