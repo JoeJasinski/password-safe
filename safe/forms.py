@@ -1,6 +1,7 @@
 from django import forms
 from safe import crypto
 from safe.exceptions import *
+from safe.models import Credential
 
 class KeyField(forms.Field):
     def to_python(self, value):
@@ -17,3 +18,9 @@ class KeyField(forms.Field):
     
 class AddPublicKeyForm(forms.Form):
     pubkey = KeyField()
+
+
+class AddCredentialForm(forms.ModelForm):
+    encrypted_secret = forms.CharField()
+    class Meta:
+        model = Credential

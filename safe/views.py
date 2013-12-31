@@ -8,8 +8,8 @@ from django.contrib.sites.models import Site
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 
-from safe.models import PublicKey 
-from safe.forms import AddPublicKeyForm
+from safe.models import PublicKey, Credential
+from safe.forms import AddPublicKeyForm, AddCredentialForm
 
 
 class JSONResponseMixin(object):
@@ -40,6 +40,7 @@ class AddKeyIndexView(TemplateView):
 
 class AddKeyView(JSONResponseMixin, TemplateView):
     http_method_names = ['post',]
+    form_class = AddPublicKeyForm
 
     @method_decorator(csrf_exempt)
     @method_decorator(login_required)
@@ -51,13 +52,37 @@ class AddKeyView(JSONResponseMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         context = {}
-        form = AddPublicKeyForm(data=request.POST)
+        form = self.form_class(data=request.POST)
         if form.is_valid():
             user = request.user 
             key, created = PublicKey.objects.get_or_create(user=user)
             key.text = form.cleaned_data['pubkey']
             key.save()
             context.update({'message':"Key Added", 'pubkey':key.text})
+        else:
+            context.update({'errors':form.errors})
+        return self.render_to_response(context)
+
+
+class AddCredentialView(JSONResponseMixin, TemplateView):
+    
+    http_method_names = ['post',]
+    form_class = AddCredentialForm
+    
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(AddCredentialView, self).dispatch(*args, **kwargs)
+
+    def render_to_response(self, context, **response_kwargs):
+        return self.render_to_json_response(context, **response_kwargs)
+
+    def post(self, request, *args, **kwargs):
+        context = {}
+        form = self.form_class(data=request.POST)
+        if form.is_valid():
+            #cred  = Credential.objects.create_credential(name, slug)
+            context.update({'message':"Credential Added",})
         else:
             context.update({'errors':form.errors})
         return self.render_to_response(context)

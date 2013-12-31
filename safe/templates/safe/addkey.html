@@ -2,7 +2,8 @@
 <head>
   <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.min.js"></script>
   <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}js/lawnchair-0.6.1.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/lawnchair-0.6.3/src/Lawnchair.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/lawnchair-0.6.3/src/adapters/dom.js"></script>
   <script type="text/javascript" src="{{ STATIC_URL }}js/jsencrypt/bin/jsencrypt.min.js"></script>
   <link href="{{ STATIC_URL }}css/bootstrap.min.css" rel="stylesheet" type="text/css">
 
@@ -16,7 +17,10 @@
 
 <script type="text/javascript">
   $(function () {
-	
+
+    var pubkey =  "";
+    var privkey = "";
+
     //Change the key size value for new keys
     $(".change-key-size").each(function (index, value) {
       var el = $(value);
@@ -62,10 +66,22 @@
       }
     });
 
-    var privatekey_storage =  new Lawnchair('privatekey',  function(){ 
+    var privatekey_storage =  new Lawnchair({name:'rsakeys'},  function(){ 
 	
+	   this.get('privkey', function(key) {
+	       if (key) { privkey = key['privkey'] || "";
+             console.log('existence is: ' + key['privkey']);
+           }
+         });
+       this.get('pubkey', function(key) {
+           if (key) { privkey = key['pubkey'] || "";
+             console.log('existence is: ' + key['pubkey']);
+           }
+         });
+        
 	    // If they wish to generate new keys.
 	    $('#generate').click(function () {
+	        
 	      var sKeySize = "2048";
 	      var sKeySize = "1024";
 	      var keySize = parseInt(sKeySize);
@@ -84,10 +100,11 @@
 	          dt = new Date();
 	          time += (dt.getTime());
 	          $('#time-report').text('Generated in ' + time + ' ms');
-		      var pubkey = crypt.getPublicKey();
-		      var privkey = crypt.getPrivateKey();
-		      var kdata = {key:'privkey', privkey:privkey};
-              privatekey_storage.save(kdata);
+		      pubkey = crypt.getPublicKey();
+		      privkey = crypt.getPrivateKey();
+	
+              privatekey_storage.save({key:'privkey', privkey:privkey});
+              privatekey_storage.save({key:'pubkey', pubkey:pubkey});
 		      $('#privkey').val(privkey);
 		      $('#pubkey').val(pubkey);
 		     
