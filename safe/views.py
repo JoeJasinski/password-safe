@@ -24,15 +24,15 @@ class JSONResponseMixin(object):
         return json.dumps(context)
 
 
-class IndexView(TemplateView):
-    template_name = "index.html"
+class AddKeyIndexView(TemplateView):
+    template_name="safe/addkey.html"
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        return super(IndexView, self).dispatch(*args, **kwargs)
+        return super(AddKeyIndexView, self).dispatch(*args, **kwargs)
     
     def get_context_data(self, **kwargs):
-        return_value = super(IndexView, self).get_context_data(**kwargs)
+        return_value = super(AddKeyIndexView, self).get_context_data(**kwargs)
         domain = Site.objects.get_current().domain
         return_value['url_key_add'] = reverse('safe-key-add')
         return return_value
@@ -57,7 +57,7 @@ class AddKeyView(JSONResponseMixin, TemplateView):
             key, created = PublicKey.objects.get_or_create(user=user)
             key.text = form.cleaned_data['pubkey']
             key.save()
-            context.update({'pubkey':key.text})
+            context.update({'message':"Key Added", 'pubkey':key.text})
         else:
             context.update({'errors':form.errors})
         return self.render_to_response(context)

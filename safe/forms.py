@@ -15,12 +15,5 @@ class KeyField(forms.Field):
             raise forms.ValidationError("Failed to import key: %s" % (e.message))
         return value
     
-    #def clean(self, value):
-    #    try:
-    #        value = super(KeyField, self).clean(value)
-    #    except EncryptionImportKeyException, e:
-    #        raise forms.ValidationError("Failed to import key: %s" % (e.message))
-    #    return value
-    
 class AddPublicKeyForm(forms.Form):
     pubkey = KeyField()
