@@ -22,7 +22,7 @@ def encrypt(public_key, clear_text):
     return ciphertext.encode('base64')
 
 
-def decrypt(self, private_key_string, ciphertext):
+def decrypt(private_key_string, ciphertext):
     '''
     param: private_key_string string of your private key
     param: ciphertext String to be decrypted

@@ -3,7 +3,7 @@ function get_key(key_property_name) {
     if ( key_property_name_prefix in window )
     { 
        var key_value = window[key_property_name_prefix];
-       console.log('Key read from memory: ' + key_value);
+       console.log('Key read from memory:\n' + key_value);
        return key_value; }
     else 
     {   var key_value = "";
@@ -11,7 +11,7 @@ function get_key(key_property_name) {
            this.get(key_property_name, function(key_record) {
                if (key_record) { 
                  key_value = key_record['key_value'] || "";
-                 console.log('Key read from storage: ' + key_value);
+                 console.log('Key read from storage:\n' + key_value);
                }
              });
         });
