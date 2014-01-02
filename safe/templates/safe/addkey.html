@@ -5,14 +5,20 @@
 <body>
   <button id="generate" class="btn btn-primary">Generate Keys</button><div id="time-report"></div>
   <div id="alert" style="display:none;">message</div>
+  
+  <input type="checkbox" name="checkbox" id="import_key" value="value">
+  <label for="import_key">Import Key</label>
+
   <textarea id="privkey" rows="15" style="width:100%"></textarea>
-  <textarea id="pubkey" rows="15" style="width:100%"></textarea>
+  <textarea id="pubkey" rows="6" style="width:100%"></textarea>
 </body>
 
 <script type="text/javascript">
 
 $(function () {
 
+    $('#pubkey').val(get_pubkey());
+    $('#privkey').val(get_privkey());
 
     //Change the key size value for new keys
     $(".change-key-size").each(function (index, value) {
@@ -69,60 +75,78 @@ $(function () {
       var async = true;
       var dt = new Date();
       var time = -(dt.getTime());
-      if (async) {
-        $('#time-report').text('.');
-        var load = setInterval(function () {
-          var text = $('#time-report').text();
-          $('#time-report').text(text + '.');
-        }, 500);
-        crypt.getKey(function () {
-          clearInterval(load);
-          dt = new Date();
-          time += (dt.getTime());
-          $('#time-report').text('Generated in ' + time + ' ms');
-	      var pubkey = crypt.getPublicKey();
-	      var privkey = crypt.getPrivateKey();
 
-	      var data = { pubkey: pubkey, };
-	      $.ajax({
-	       type: "POST",
-	       url: '{{ url_key_add }}',
-	       data: data,
-	       dataType: "json",
-           success: function(data, textStatus, jqXHR)
-           {
-              //data - response from server
-              $("#alert").show( "fast", function() {
-                  if(data.message) {
+      function saveKey(pubkey, privkey)
+      {
+          var data = { pubkey: pubkey, };
+          $.ajax({
+              type: "POST",
+              url: '{{ url_key_add }}',
+              data: data,
+              dataType: "json",
+              success: function(data, textStatus, jqXHR)
+              {
+                 //data - response from server
+                 $("#alert").show( "fast", function() {
+                     if(data.message) {
                          set_privkey(privkey);
                          set_pubkey(pubkey);
                          $('#privkey').val(privkey);
                          $('#pubkey').val(pubkey);
-                        $( this ).html("Key Saved");
-                   } else if( data.errors ) {
-                        $( this ).html("Error with save " + data.errors);
-                   } else {
-                        $( this ).html("Unexpected Error");
-                   }                    
-              }).delay(2000).fadeOut( "5000");  ;
-              
-           },
-           error: function (jqXHR, textStatus, errorThrown)
-           {
-              //data - response from server
-              $("#alert").show( "fast", function() {
-                  $( this ).html("Error with save " + data.errors).delay(2000).fadeOut( "5000");                     
-              });
-           }
-           
-	      });
-      
-        });
-        return;
+                         $( this ).html("Key Saved");
+                     } 
+                     else if( data.errors ) 
+                     {  
+                         var error_string = "<ul>";
+                         
+                         $.each(data.errors, function(key, value) {
+                            $.each(value, function() {
+                               error_string = error_string + "<li>" + key + ":  "+ value + "</li>";
+                            });
+                        });
+                        
+                        $( this ).html("Error with save " + error_string); 
+                        
+                     } 
+                     else {  $( this ).html("Unexpected Error"); }                    
+                 }).delay(2000).fadeOut( "5000");  ;  
+              },
+              error: function (jqXHR, textStatus, errorThrown)
+              {
+                 //data - response from server
+                 $("#alert").show( "fast", function() {
+                     $( this ).html("Error with save " + data.errors).delay(4000).fadeOut( "slow");                     
+                 });
+              }
+          }); 
       }
       
-    });
-    
+      
+      $('#time-report').text('.');
+      if ($("#import_key").is(':checked'))
+      {
+           var pubkey = $('#pubkey').val();
+           var privkey = $('#privkey').val();
+           saveKey(pubkey, privkey);
+      }
+      else
+      {
+          var load = setInterval(function () {
+              var text = $('#time-report').text();
+              $('#time-report').text(text + '.');
+          }, 500);
+          crypt.getKey(function () {
+                  clearInterval(load);
+                  dt = new Date();
+                  time += (dt.getTime());
+                  $('#time-report').text('Generated in ' + time + ' ms');
+                  var pubkey = crypt.getPublicKey();
+                  var privkey = crypt.getPrivateKey();
+                  saveKey(pubkey, privkey);
+          });
+      }
+      return;
+  });
     
 });
 </script>
