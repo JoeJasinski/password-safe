@@ -46,10 +46,13 @@ class CredentialManager(models.Manager):
         credential = Credential.objects.create(name=name, slug=slug, **kwargs)
         credential.get_or_create_usersecret(user, plain_secret)
         return credential
+    
+    def get_user_credentials(self, user):
+        return Credential.objects.filter(credentials__user=user)
 
 
 class Credential(MetaInfoMixin, models.Model):
-    name = models.CharField(max_length=255,)
+    title = models.CharField(max_length=255,)
     slug = models.SlugField(max_length=255, unique=True)
     url = models.URLField(blank=True, null=True)
     tags = models.TextField(blank=True, null=True)

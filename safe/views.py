@@ -1,6 +1,6 @@
 import json
 from django.shortcuts import render
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, ListView
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.core.urlresolvers import reverse
@@ -75,7 +75,7 @@ class AddCredentialIndexView(TemplateView):
         return_value = super(AddCredentialIndexView, self).get_context_data(**kwargs)
         domain = Site.objects.get_current().domain
         return_value['form'] = AddCredentialForm()
-        return_value['url_credential_add'] = reverse('safe-credential-add')
+        return_value['url_credential_add'] = reverse('safe-credential-add-json')
         return return_value
 
 
@@ -104,3 +104,16 @@ class AddCredentialView(JSONResponseMixin, TemplateView):
         else:
             context.update({'errors':form.errors})
         return self.render_to_response(context)
+
+
+class ListCredentialView(ListView):
+    http_method_names = [u'get',]
+    template_name = "safe/listcredential.html"
+
+    def get_queryset(self):
+        return Credential.objects.get_user_credentials(user=self.request.user)
+    
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(ListCredentialView, self).dispatch(*args, **kwargs)
+    

@@ -2,8 +2,9 @@
 
 
 {% block content %}{{ block.super }}
+  <h2>Generate Key</h2>
   <button id="generate" class="btn btn-primary">Generate Keys</button><div id="time-report"></div>
-  <div id="alert" style="display:none;">message</div>
+  <div class="alert alert alert-danger" id="alert" style="display:none;">message</div>
   
   <input type="checkbox" name="checkbox" id="import_key" value="value">
   <label for="import_key">Import Key</label>
