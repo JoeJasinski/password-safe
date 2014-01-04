@@ -15,7 +15,8 @@ class KeyField(forms.Field):
         except EncryptionImportKeyException, e:
             raise forms.ValidationError("Failed to import key: %s" % (e.message))
         return value
-    
+
+
 class AddPublicKeyForm(forms.Form):
     pubkey = KeyField()
 

@@ -14,7 +14,7 @@ class UserSecretInline(admin.StackedInline):
 
 class CredentialAdmin(admin.ModelAdmin):
     inlines = [UserSecretInline,]
-    list_display = ['name', 'tags', 'login_name',  'created', 'modified']
+    list_display = ['name', 'slug', 'tags', 'login_name',  'created', 'modified']
     readonly_fields = ['created', 'modified']
 
 

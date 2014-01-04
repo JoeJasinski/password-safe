@@ -64,6 +64,21 @@ class AddKeyView(JSONResponseMixin, TemplateView):
         return self.render_to_response(context)
 
 
+class AddCredentialIndexView(TemplateView):
+    template_name="safe/addcredential.html"
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(AddCredentialIndexView, self).dispatch(*args, **kwargs)
+    
+    def get_context_data(self, **kwargs):
+        return_value = super(AddCredentialIndexView, self).get_context_data(**kwargs)
+        domain = Site.objects.get_current().domain
+        return_value['form'] = AddCredentialForm()
+        return_value['url_credential_add'] = reverse('safe-credential-add')
+        return return_value
+
+
 class AddCredentialView(JSONResponseMixin, TemplateView):
     
     http_method_names = ['post',]
@@ -81,6 +96,7 @@ class AddCredentialView(JSONResponseMixin, TemplateView):
         context = {}
         form = self.form_class(data=request.POST)
         if form.is_valid():
+            form.save()
             #cred  = Credential.objects.create_credential(name, slug)
             context.update({'message':"Credential Added",})
         else:

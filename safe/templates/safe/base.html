@@ -9,3 +9,13 @@
   <script type="text/javascript" src="{{ STATIC_URL }}js/safe.js"></script>
   <link href="{{ STATIC_URL }}css/bootstrap.min.css" rel="stylesheet" type="text/css">
 {% endblock %}
+
+
+{% block content %}
+<nav>
+    <ul>
+        <li><a href="{% url 'safe-key' %}">Generate Key</a></li>
+        <li><a href="{% url 'safe-credential' %}">Add Credential</a></li>
+    </ul>
+</nav>
+{% endblock %}

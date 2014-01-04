@@ -1,8 +1,7 @@
 {% extends "safe/base.html" %}
 
 
-{% block content %}
-<body>
+{% block content %}{{ block.super }}
   <button id="generate" class="btn btn-primary">Generate Keys</button><div id="time-report"></div>
   <div id="alert" style="display:none;">message</div>
   
@@ -11,12 +10,11 @@
 
   <textarea id="privkey" rows="15" style="width:100%"></textarea>
   <textarea id="pubkey" rows="6" style="width:100%"></textarea>
-</body>
+{% endblock %}
 
+{% block extra_js %}
 <script type="text/javascript">
-
 $(function () {
-
     $('#pubkey').val(get_pubkey());
     $('#privkey').val(get_privkey());
 
