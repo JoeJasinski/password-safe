@@ -33,3 +33,16 @@ function get_privkey() {  return get_key("privkey"); }
 function set_privkey(key) {  return set_key("privkey", key); }
 function get_pubkey() {  return get_key("pubkey"); }
 function set_pubkey(key) {  return set_key("pubkey", key); }
+
+
+
+function rsa_encrypt(text, public_key)
+{
+   var crypt = new JSEncrypt();
+   crypt.setPublicKey(public_key);
+   return crypt.encrypt(text);
+}
+
+function local_rsa_encrypt(text)
+{ return rsa_encrypt(text, get_pubkey()); }
+

@@ -96,7 +96,9 @@ class AddCredentialView(JSONResponseMixin, TemplateView):
         context = {}
         form = self.form_class(data=request.POST)
         if form.is_valid():
-            form.save()
+            encrypted_secret = form.cleaned_data['secret']
+            credential = form.save()
+            credential.get_or_create_encrypted_usersecret(request.user, encrypted_secret)
             #cred  = Credential.objects.create_credential(name, slug)
             context.update({'message':"Credential Added",})
         else:

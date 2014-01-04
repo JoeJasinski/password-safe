@@ -22,6 +22,9 @@ class AddPublicKeyForm(forms.Form):
 
 
 class AddCredentialForm(forms.ModelForm):
-    encrypted_secret = forms.CharField()
+    secret = forms.CharField()
     class Meta:
         model = Credential
+        widgets = {
+          'tags': forms.Textarea(attrs={'rows':1, 'cols':30}),
+        }

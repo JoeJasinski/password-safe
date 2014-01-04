@@ -61,6 +61,18 @@ class Credential(MetaInfoMixin, models.Model):
     def __unicode__(self):
         return "%s" % (self.name)
     
+    def get_or_create_encrypted_usersecret(self, user, encrypted_secret):
+        """
+        param: user User - Django User to create a UserSecret for
+        param: encrypted_secret String - encrypted text of password/secret value
+        returns a UserSecret object and a boolean of whether or not a new
+          object was created. 
+        """
+        secret, created = UserSecret.objects.get_or_create(credential=self, user=user, )
+        secret.encrypted_secret = encrypted_secret
+        secret.save()
+        return secret, created 
+    
     def get_or_create_usersecret(self, user, plain_secret):
         """
         param: user User - Django User to create a UserSecret for
