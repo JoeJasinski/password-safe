@@ -28,3 +28,13 @@ class AddCredentialForm(forms.ModelForm):
         widgets = {
           'tags': forms.Textarea(attrs={'rows':1, 'cols':30}),
         }
+    def __init__(self, *args, **kw):
+        super(AddCredentialForm, self).__init__(*args, **kw)
+        self.fields.keyOrder = [
+            'title',
+            'login_name',
+            'secret',
+            'slug',
+            'url',
+            'tags',
+            'notes',]
