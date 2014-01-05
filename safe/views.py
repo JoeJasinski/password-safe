@@ -1,6 +1,7 @@
 import json
 from django.shortcuts import render
-from django.views.generic import TemplateView, ListView
+from django.views.generic import TemplateView, ListView, DetailView
+from django.views.generic.detail import SingleObjectMixin
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.core.urlresolvers import reverse
@@ -23,6 +24,8 @@ class JSONResponseMixin(object):
     def convert_context_to_json(self, context):
         return json.dumps(context)
 
+    def render_to_response(self, context, **response_kwargs):
+        return self.render_to_json_response(context, **response_kwargs)
 
 class AddKeyIndexView(TemplateView):
     template_name="safe/addkey.html"
@@ -47,8 +50,6 @@ class AddKeyView(JSONResponseMixin, TemplateView):
     def dispatch(self, *args, **kwargs):
         return super(AddKeyView, self).dispatch(*args, **kwargs)
     
-    def render_to_response(self, context, **response_kwargs):
-        return self.render_to_json_response(context, **response_kwargs)
 
     def post(self, request, *args, **kwargs):
         context = {}
@@ -89,9 +90,6 @@ class AddCredentialView(JSONResponseMixin, TemplateView):
     def dispatch(self, *args, **kwargs):
         return super(AddCredentialView, self).dispatch(*args, **kwargs)
 
-    def render_to_response(self, context, **response_kwargs):
-        return self.render_to_json_response(context, **response_kwargs)
-
     def post(self, request, *args, **kwargs):
         context = {}
         form = self.form_class(data=request.POST)
@@ -99,7 +97,6 @@ class AddCredentialView(JSONResponseMixin, TemplateView):
             encrypted_secret = form.cleaned_data['secret']
             credential = form.save()
             credential.get_or_create_encrypted_usersecret(request.user, encrypted_secret)
-            #cred  = Credential.objects.create_credential(name, slug)
             context.update({'message':"Credential Added",})
         else:
             context.update({'errors':form.errors})
@@ -116,4 +113,37 @@ class ListCredentialView(ListView):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(ListCredentialView, self).dispatch(*args, **kwargs)
+
+    def get_context_object_name(self, obj):
+        return "credentials"
+
+
+class DetailCredentialView(DetailView):
     
+    model = Credential
+    http_method_names = [u'get']
+    template_name = "safe/editcredential.html"
+    
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(DetailCredentialView, self).dispatch(*args, **kwargs)
+
+    def get_context_object_name(self, obj):
+        return "credential"
+
+
+class ViewCredentialView(JSONResponseMixin, DetailView):
+    model = Credential
+    http_method_names = [u'get']
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(ViewCredentialView, self).dispatch(*args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        context = {'message':'Key returned', 
+                   'encrypted_secret':self.get_object().get_usersecret_cyphertext(request.user)}
+        return self.render_to_response(context)
+    
+    def get_context_object_name(self, obj):
+        return "credential"

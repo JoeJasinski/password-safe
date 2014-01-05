@@ -46,3 +46,10 @@ function rsa_encrypt(text, public_key)
 function local_rsa_encrypt(text)
 { return rsa_encrypt(text, get_pubkey()); }
 
+function local_rsa_decrypt(cypher_text)
+{
+    var crypt = new JSEncrypt();
+    crypt.setPrivateKey(get_privkey());
+    return crypt.decrypt(cypher_text);
+    
+}

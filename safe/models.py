@@ -48,7 +48,7 @@ class CredentialManager(models.Manager):
         return credential
     
     def get_user_credentials(self, user):
-        return Credential.objects.filter(credentials__user=user)
+        return Credential.objects.filter(user_secrets__user=user)
 
 
 class Credential(MetaInfoMixin, models.Model):
@@ -62,7 +62,7 @@ class Credential(MetaInfoMixin, models.Model):
     objects = CredentialManager()
 
     def __unicode__(self):
-        return "%s" % (self.name)
+        return "%s" % (self.title)
     
     def get_or_create_encrypted_usersecret(self, user, encrypted_secret):
         """
@@ -88,9 +88,26 @@ class Credential(MetaInfoMixin, models.Model):
         secret.save()
         return secret, created
     
+    def get_usersecret(self, user):
+        secret = None
+        try:
+            secret = self.user_secrets.get(user=user)
+        except UserSecret.DoesNotExist:
+            pass
+        except UserSecret.MultipleObjectsReturned:
+            pass
+        return secret
+    
+    def get_usersecret_cyphertext(self, user):
+        cypher_text = None
+        secret = self.get_usersecret(user)
+        if secret:
+            cypher_text = secret.encrypted_secret
+        return cypher_text
+            
 
 class UserSecret(MetaInfoMixin, models.Model):
-    credential = models.ForeignKey('safe.Credential', related_name="credentials")
+    credential = models.ForeignKey('safe.Credential', related_name="user_secrets")
     user = models.ForeignKey('auth.User')
     encrypted_secret = models.TextField(u"Password/Key/Secret", blank=True, null=True)
     
