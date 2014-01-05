@@ -1,6 +1,7 @@
 from django.db import models
 from django.core import exceptions 
 from safe import crypto
+from django_extensions.db.fields import AutoSlugField
 from safe.exceptions import *
 
 class MetaInfoMixin(models.Model):
@@ -53,7 +54,7 @@ class CredentialManager(models.Manager):
 
 class Credential(MetaInfoMixin, models.Model):
     title = models.CharField(max_length=255,)
-    slug = models.SlugField(max_length=255, unique=True)
+    slug = AutoSlugField(max_length=255, unique=True, populate_from="title")
     url = models.URLField(blank=True, null=True)
     tags = models.TextField(blank=True, null=True)
     login_name = models.CharField(u'Login/ID/Username', max_length=255, blank=True, null=True)

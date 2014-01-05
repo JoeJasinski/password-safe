@@ -34,7 +34,6 @@ class AddCredentialForm(forms.ModelForm):
             'title',
             'login_name',
             'secret',
-            'slug',
             'url',
             'tags',
             'notes',]
