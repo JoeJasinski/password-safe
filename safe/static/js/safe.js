@@ -53,3 +53,27 @@ function local_rsa_decrypt(cypher_text)
     return crypt.decrypt(cypher_text);
     
 }
+
+
+
+function report_error(error_dom_node, error_data, error_class)
+{
+    if(typeof(error_class)==='undefined') { error_class = "alert-danger"; }
+    $(error_dom_node).addClass(error_class);
+     var error_string = "<ul>";
+     $.each(error_data, function(key, value) {
+        $.each(value, function() {
+           error_string = error_string + "<li>" + key + ":  "+ value + "</li>";
+        });
+    });
+    $( error_dom_node ).html("Error:" + error_string);
+    return error_dom_node;
+}
+
+function report_success(success_dom_node, message_string, message_class)
+{
+    if(typeof(message_class)==='undefined') { message_class = "alert-success"; }
+    $(success_dom_node).addClass(message_class);
+    $(success_dom_node).html(message_string);
+    return success_dom_node;
+}
