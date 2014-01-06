@@ -1,7 +1,8 @@
 from django.conf.urls import patterns, include, url
 from safe.views import (AddKeyIndexView, AddKeyView, 
                         AddCredentialIndexView, AddCredentialView,
-                        ListCredentialView, DetailCredentialView, ViewCredentialView)
+                        ListCredentialView, DetailCredentialView, 
+                        ViewCredentialView, DeleteCredentialView)
 
 urlpatterns = patterns('',
 
@@ -12,4 +13,5 @@ urlpatterns = patterns('',
     url(r'^credential/add.json$', AddCredentialView.as_view(), {}, name="safe-credential-add-json"),
     url(r'^credential/(?P<slug>[-_\w]+)/$', DetailCredentialView.as_view(), name='safe-credential-edit'),
     url(r'^credential/(?P<slug>[-_\w]+)\.json$', ViewCredentialView.as_view(), name='safe-credential-view-json'),
+    url(r'^credential/(?P<slug>[-_\w]+)/delete/$', DeleteCredentialView.as_view(), name='safe-credential-delete'),
 )
