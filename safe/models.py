@@ -3,6 +3,7 @@ from django.core import exceptions
 from safe import crypto
 from django_extensions.db.fields import AutoSlugField
 from safe.exceptions import *
+from mptt.models import MPTTModel, TreeForeignKey
 
 class MetaInfoMixin(models.Model):
     created = models.DateTimeField(auto_now_add=True)
@@ -107,11 +108,15 @@ class Credential(MetaInfoMixin, models.Model):
         return cypher_text
             
 
-class UserSecret(MetaInfoMixin, models.Model):
+class UserSecret(MPTTModel, MetaInfoMixin, models.Model):
     credential = models.ForeignKey('safe.Credential', related_name="user_secrets")
     user = models.ForeignKey('auth.User')
     encrypted_secret = models.TextField(u"Password/Key/Secret", blank=True, null=True)
-    
+    granted_by = TreeForeignKey('self', null=True, blank=True, related_name='children')
+
+    class MPTTMeta:
+        parent_attr="granted_by"
+
     def __unicode__(self):
         return "%s %s" % (self.credential, self.user)
     
