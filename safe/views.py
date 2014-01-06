@@ -1,6 +1,6 @@
 import json
 from django.shortcuts import render
-from django.views.generic import TemplateView, ListView, DetailView
+from django.views.generic import TemplateView, ListView, DetailView, DeleteView
 from django.views.generic.detail import SingleObjectMixin
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
+from django.core.urlresolvers import reverse_lazy
 
 from safe.models import PublicKey, Credential
 from safe.forms import AddPublicKeyForm, AddCredentialForm
@@ -147,3 +148,14 @@ class ViewCredentialView(JSONResponseMixin, DetailView):
     
     def get_context_object_name(self, obj):
         return "credential"
+
+
+class DeleteCredentialView(DeleteView):
+    model = Credential
+    http_method_names = [u'get', u'post']
+    success_url = reverse_lazy('safe-credential-list')
+    template_name = "safe/deletecredential.html"
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(DeleteCredentialView, self).dispatch(*args, **kwargs)
