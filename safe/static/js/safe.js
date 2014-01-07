@@ -50,10 +50,8 @@ function local_rsa_decrypt(cypher_text)
 {
     var crypt = new JSEncrypt();
     crypt.setPrivateKey(get_privkey());
-    return crypt.decrypt(cypher_text);
-    
+    return crypt.decrypt(cypher_text);    
 }
-
 
 
 function report_error(error_dom_node, error_data, error_class)
@@ -69,6 +67,7 @@ function report_error(error_dom_node, error_data, error_class)
     $( error_dom_node ).html("Error:" + error_string);
     return error_dom_node;
 }
+
 
 function report_success(success_dom_node, message_string, message_class)
 {

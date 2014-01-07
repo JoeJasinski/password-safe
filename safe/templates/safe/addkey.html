@@ -8,9 +8,9 @@
   
   <input type="checkbox" name="checkbox" id="import_key" value="value">
   <label for="import_key">Import Key</label>
-
-  <textarea id="privkey" rows="15" style="width:100%"></textarea>
-  <textarea id="pubkey" rows="6" style="width:100%"></textarea>
+ 
+  {{ form.as_p }}
+ 
 {% endblock %}
 
 {% block extra_js %}
