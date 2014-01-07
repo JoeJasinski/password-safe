@@ -7,7 +7,7 @@ from django.utils.decorators import method_decorator
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse_lazy
 
 from safe.models import PublicKey, Credential
@@ -104,12 +104,16 @@ class AddCredentialView(JSONResponseMixin, TemplateView):
         return self.render_to_response(context)
 
 
-class ListCredentialView(ListView):
-    http_method_names = [u'get',]
-    template_name = "safe/listcredential.html"
+class CredentialOwnershipMixin(object):
 
     def get_queryset(self):
-        return Credential.objects.get_user_credentials(user=self.request.user)
+        return self.model._default_manager.get_user_credentials(user=self.request.user)
+
+class ListCredentialView(CredentialOwnershipMixin, ListView):
+    
+    model = Credential
+    http_method_names = [u'get',]
+    template_name = "safe/listcredential.html"
     
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
@@ -119,7 +123,7 @@ class ListCredentialView(ListView):
         return "credentials"
 
 
-class DetailCredentialView(DetailView):
+class DetailCredentialView(CredentialOwnershipMixin, DetailView):
     
     model = Credential
     http_method_names = [u'get']
@@ -133,13 +137,14 @@ class DetailCredentialView(DetailView):
         return "credential"
 
 
-class ViewCredentialView(JSONResponseMixin, DetailView):
+class ViewCredentialView(JSONResponseMixin, CredentialOwnershipMixin, DetailView):
     model = Credential
     http_method_names = [u'get']
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        return super(ViewCredentialView, self).dispatch(*args, **kwargs)
+        return_value = super(ViewCredentialView, self).dispatch(*args, **kwargs)
+        return return_value
 
     def get(self, request, *args, **kwargs):
         context = {'message':'Key returned', 
@@ -150,12 +155,25 @@ class ViewCredentialView(JSONResponseMixin, DetailView):
         return "credential"
 
 
-class DeleteCredentialView(DeleteView):
+class DeleteCredentialView(CredentialOwnershipMixin, DeleteView):
     model = Credential
     http_method_names = [u'get', u'post']
     success_url = reverse_lazy('safe-credential-list')
     template_name = "safe/deletecredential.html"
 
     @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(DeleteCredentialView, self).dispatch(*args, **kwargs)
+    def dispatch(self, request, *args, **kwargs):
+        return_value = super(DeleteCredentialView, self).dispatch(request, *args, **kwargs)
+        return return_value
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        secret = self.object.get_usersecret(user=request.user)
+        if secret:
+            secret.delete()
+            if not self.object.user_secrets.count():
+                self.object.delete()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_object_name(self, obj):
+        return "credential"

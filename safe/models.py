@@ -125,4 +125,4 @@ class UserSecret(MPTTModel, MetaInfoMixin, models.Model):
             self.encrypted_secret = self.user.publickey.encrypt(plain_secret)
         except exceptions.ObjectDoesNotExist, e:
             raise EncryptionNoUserKeyException(e.message)
-    
+

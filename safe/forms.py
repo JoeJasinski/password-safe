@@ -20,8 +20,8 @@ class KeyField(forms.Field):
 class AddPublicKeyForm(forms.Form):
     pubkey = KeyField()
 
-
 class AddCredentialForm(forms.ModelForm):
+    
     secret = forms.CharField()
     class Meta:
         model = Credential
@@ -30,6 +30,11 @@ class AddCredentialForm(forms.ModelForm):
         }
     def __init__(self, *args, **kw):
         super(AddCredentialForm, self).__init__(*args, **kw)
+        for name, field in self.fields.items():
+            if field.widget.attrs.has_key('class'):
+                field.widget.attrs['class'] += ' form-control'
+            else:
+                field.widget.attrs.update({'class':'form-control'})
         self.fields.keyOrder = [
             'title',
             'login_name',
