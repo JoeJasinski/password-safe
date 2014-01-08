@@ -1,5 +1,5 @@
 import json
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views.generic import TemplateView, ListView, DetailView, DeleteView
 from django.views.generic.detail import SingleObjectMixin
 from django.contrib.auth.decorators import login_required
@@ -11,7 +11,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse_lazy
 
 from safe.models import PublicKey, Credential
-from safe.forms import AddPublicKeyForm, AddCredentialForm
+from safe.forms import CreatePublicKeyForm, CreateUpdateCredentialForm
 
 
 class JSONResponseMixin(object):
@@ -39,19 +39,19 @@ class AddKeyIndexView(TemplateView):
     def get_context_data(self, **kwargs):
         return_value = super(AddKeyIndexView, self).get_context_data(**kwargs)
         domain = Site.objects.get_current().domain
-        return_value['form'] = AddPublicKeyForm(show_privkey=True)
+        return_value['form'] = CreatePublicKeyForm(show_privkey=True)
         return_value['url_key_add'] = reverse('safe-key-add')
         return return_value
     
 
-class AddKeyView(JSONResponseMixin, TemplateView):
+class CreateKeyView(JSONResponseMixin, TemplateView):
     http_method_names = ['post',]
-    form_class = AddPublicKeyForm
+    form_class = CreatePublicKeyForm
 
     @method_decorator(csrf_exempt)
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        return super(AddKeyView, self).dispatch(*args, **kwargs)
+        return super(CreateKeyView, self).dispatch(*args, **kwargs)
     
     def post(self, request, *args, **kwargs):
         context = {}
@@ -67,39 +67,44 @@ class AddKeyView(JSONResponseMixin, TemplateView):
         return self.render_to_response(context)
 
 
-class AddCredentialIndexView(TemplateView):
-    template_name="safe/addcredential.html"
+class CreateCredentialIndexView(TemplateView):
+    template_name="safe/createcredential.html"
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        return super(AddCredentialIndexView, self).dispatch(*args, **kwargs)
+        return super(CreateCredentialIndexView, self).dispatch(*args, **kwargs)
     
     def get_context_data(self, **kwargs):
-        return_value = super(AddCredentialIndexView, self).get_context_data(**kwargs)
+        return_value = super(CreateCredentialIndexView, self).get_context_data(**kwargs)
         domain = Site.objects.get_current().domain
-        return_value['form'] = AddCredentialForm()
+        return_value['form'] = CreateUpdateCredentialForm()
         return_value['url_credential_add'] = reverse('safe-credential-add-json')
         return return_value
 
 
-class AddCredentialView(JSONResponseMixin, TemplateView):
+class CreateUpdateCredentialView(JSONResponseMixin, TemplateView):
     
     http_method_names = ['post',]
-    form_class = AddCredentialForm
+    form_class = CreateUpdateCredentialForm
     
     @method_decorator(csrf_exempt)
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        return super(AddCredentialView, self).dispatch(*args, **kwargs)
+        return super(CreateUpdateCredentialView, self).dispatch(*args, **kwargs)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, slug=None, *args, **kwargs):
         context = {}
-        form = self.form_class(data=request.POST)
+        instance = None
+        edit = bool(slug)
+        if slug: 
+            instance = get_object_or_404(Credential, slug=slug)
+        form = self.form_class(data=request.POST, instance=instance, edit=edit)
         if form.is_valid():
-            encrypted_secret = form.cleaned_data['secret']
             credential = form.save()
-            credential.get_or_create_encrypted_usersecret(request.user, encrypted_secret)
-            context.update({'message':"Credential Added",})
+            if not edit:
+                encrypted_secret = form.cleaned_data['secret']
+                credential.get_or_create_encrypted_usersecret(request.user, encrypted_secret)
+            context.update({'message':"Credential Added","url":reverse('safe-credential-edit', args=[credential.slug])})
         else:
             context.update({'errors':form.errors})
         return self.render_to_response(context)
@@ -124,33 +129,34 @@ class ListCredentialView(CredentialOwnershipMixin, ListView):
         return "credentials"
 
 
-class DetailCredentialView(CredentialOwnershipMixin, DetailView):
+class UpdateCredentialView(CredentialOwnershipMixin, DetailView):
     
     model = Credential
     http_method_names = [u'get']
-    template_name = "safe/editcredential.html"
-    form_class = AddCredentialForm
+    template_name = "safe/updatecredential.html"
+    form_class = CreateUpdateCredentialForm
     
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        return super(DetailCredentialView, self).dispatch(*args, **kwargs)
+        return super(UpdateCredentialView, self).dispatch(*args, **kwargs)
 
     def get_context_object_name(self, obj):
         return "credential"
 
     def get_context_data(self, **kwargs):
-        return_value = super(DetailCredentialView, self).get_context_data(**kwargs)
-        return_value['form'] = self.form_class(instance=self.get_object())
+        return_value = super(UpdateCredentialView, self).get_context_data(**kwargs)
+        return_value['form'] = self.form_class(instance=self.get_object(), edit=True)
+        return_value['url_credential_edit'] = reverse('safe-credential-edit-json', args=[self.get_object().slug])
         return return_value
 
 
-class ViewCredentialView(JSONResponseMixin, CredentialOwnershipMixin, DetailView):
+class ViewCredentialSecretView(JSONResponseMixin, CredentialOwnershipMixin, DetailView):
     model = Credential
     http_method_names = [u'get']
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        return_value = super(ViewCredentialView, self).dispatch(*args, **kwargs)
+        return_value = super(ViewCredentialSecretView, self).dispatch(*args, **kwargs)
         return return_value
 
     def get(self, request, *args, **kwargs):

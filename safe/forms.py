@@ -23,12 +23,12 @@ class KeyField(forms.Field):
         return value
 
 
-class AddPublicKeyForm(forms.Form):
+class CreatePublicKeyForm(forms.Form):
     pubkey = KeyField()
 
     def __init__(self, *args, **kw):
         show_privkey = kw.pop('show_privkey', None)
-        super(AddPublicKeyForm, self).__init__(*args, **kw)
+        super(CreatePublicKeyForm, self).__init__(*args, **kw)
         self.fields['pubkey'].widget.attrs['rows'] = "6"
         self.fields['pubkey'].widget.attrs['id'] = "pubkey"
         if show_privkey:
@@ -44,25 +44,23 @@ class AddPublicKeyForm(forms.Form):
                 field.widget.attrs.update({'class':'form-control'})
 
 
-class AddCredentialForm(forms.ModelForm):
+class CreateUpdateCredentialForm(forms.ModelForm):
     
-    secret = forms.CharField()
     class Meta:
         model = Credential
         widgets = {
           'tags': forms.Textarea(attrs={'rows':1, 'cols':30}),
         }
-    def __init__(self, *args, **kw):
-        super(AddCredentialForm, self).__init__(*args, **kw)
+    def __init__(self, edit=False, *args, **kw):
+        super(CreateUpdateCredentialForm, self).__init__(*args, **kw)
+        if not edit:
+            self.fields['secret'] = forms.CharField()
         for name, field in self.fields.items():
             if field.widget.attrs.has_key('class'):
                 field.widget.attrs['class'] += ' form-control'
             else:
                 field.widget.attrs.update({'class':'form-control'})
-        self.fields.keyOrder = [
-            'title',
-            'login_name',
-            'secret',
-            'url',
-            'tags',
-            'notes',]
+        self.fields.keyOrder = [ 'title', 'login_name',] + \
+            [x for x in ['secret'] if not edit ] +  \
+            ['url', 'tags', 'notes',]
+        
