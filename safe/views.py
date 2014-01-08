@@ -129,6 +129,7 @@ class DetailCredentialView(CredentialOwnershipMixin, DetailView):
     model = Credential
     http_method_names = [u'get']
     template_name = "safe/editcredential.html"
+    form_class = AddCredentialForm
     
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
@@ -136,6 +137,11 @@ class DetailCredentialView(CredentialOwnershipMixin, DetailView):
 
     def get_context_object_name(self, obj):
         return "credential"
+
+    def get_context_data(self, **kwargs):
+        return_value = super(DetailCredentialView, self).get_context_data(**kwargs)
+        return_value['form'] = self.form_class(instance=self.get_object())
+        return return_value
 
 
 class ViewCredentialView(JSONResponseMixin, CredentialOwnershipMixin, DetailView):
