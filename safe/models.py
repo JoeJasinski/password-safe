@@ -126,3 +126,9 @@ class UserSecret(MPTTModel, MetaInfoMixin, models.Model):
         except exceptions.ObjectDoesNotExist, e:
             raise EncryptionNoUserKeyException(e.message)
 
+
+class Tag(models.Model):
+    name = models.CharField(max_length=30)
+    
+    def __unicode__(self):
+        return "%s" % (self.name)

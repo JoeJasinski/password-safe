@@ -11,7 +11,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse_lazy
 
 from safe.models import PublicKey, Credential
-from safe.forms import CreatePublicKeyForm, CreateUpdateCredentialForm
+from safe.forms import CreatePublicKeyForm, CreateUpdateCredentialForm, SearchTagField
 
 
 class JSONResponseMixin(object):
@@ -190,3 +190,24 @@ class DeleteCredentialView(CredentialOwnershipMixin, DeleteView):
 
     def get_context_object_name(self, obj):
         return "credential"
+
+
+class ListTagsView(JSONResponseMixin, CredentialOwnershipMixin, TemplateView):
+    http_method_names = [u'get', u'post']
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return_value = super(ListTagsView, self).dispatch(request, *args, **kwargs)
+        return return_value
+    
+    def get_context_object_name(self, obj):
+        return "credentials" 
+    
+    def get(self, request, *args, **kwargs):
+        form = SearchTagField(data=request.GET)
+        if form.is_valid():
+            q = form.cleaned_data.get('q', "")
+        context = {'message':'Tags returned', 
+                   'tags':['red', 'blue', 'green', 'yellow']}
+        return self.render_to_response(context)
+      

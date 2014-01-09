@@ -2,7 +2,8 @@ from django.conf.urls import patterns, include, url
 from safe.views import (AddKeyIndexView, CreateKeyView, 
                         CreateCredentialIndexView, CreateUpdateCredentialView,
                         ListCredentialView, UpdateCredentialView, 
-                        ViewCredentialSecretView, DeleteCredentialView)
+                        ViewCredentialSecretView, DeleteCredentialView,
+                        ListTagsView)
 
 urlpatterns = patterns('',
 
@@ -15,4 +16,5 @@ urlpatterns = patterns('',
     url(r'^credential/(?P<slug>[-_\w]+)\.json$', ViewCredentialSecretView.as_view(), name='safe-credential-secret-view-json'),
     url(r'^credential/(?P<slug>[-_\w]+)/edit.json$', CreateUpdateCredentialView.as_view(), name='safe-credential-edit-json'),
     url(r'^credential/(?P<slug>[-_\w]+)/delete/$', DeleteCredentialView.as_view(), name='safe-credential-delete'),
+    url(r'^tags\.json$', ListTagsView.as_view(), name='safe-tags-list'),
 )

@@ -63,4 +63,8 @@ class CreateUpdateCredentialForm(forms.ModelForm):
         self.fields.keyOrder = [ 'title', 'login_name',] + \
             [x for x in ['secret'] if not edit ] +  \
             ['url', 'tags', 'notes',]
-        
+    
+    
+class SearchTagField(forms.Form):
+    
+    q = forms.CharField(required=False)    
