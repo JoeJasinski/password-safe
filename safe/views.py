@@ -60,6 +60,7 @@ class CreateKeyView(JSONResponseMixin, TemplateView):
             user = request.user 
             key, created = PublicKey.objects.get_or_create(user=user)
             key.text = form.cleaned_data['pubkey']
+            key.hash = form.cleaned_data['hash']
             key.save()
             context.update({'message':"Key Added", 'pubkey':key.text})
         else:

@@ -5,6 +5,7 @@ from django_extensions.db.fields import AutoSlugField
 from safe.exceptions import *
 from mptt.models import MPTTModel, TreeForeignKey
 
+
 class MetaInfoMixin(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
@@ -16,6 +17,7 @@ class MetaInfoMixin(models.Model):
 class PublicKey(MetaInfoMixin, models.Model):
     user = models.OneToOneField('auth.User')
     text = models.TextField(blank=True, null=True)
+    hash = models.CharField(max_length=40, blank=True, null=True)
     
     def __unicode__(self):
         return "%s" % (self.user)
@@ -32,7 +34,8 @@ class PublicKey(MetaInfoMixin, models.Model):
         """
         return crypto.encrypt(self.get_public_key(), clear_text)
     
-    
+
+
 class CredentialManager(models.Manager):
     
     def create_credential(self, name, slug, plain_secret, user, **kwargs):
