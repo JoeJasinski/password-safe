@@ -65,3 +65,7 @@ RCS
 RCSLOG
 SCCS
 _$*
+*.log
+*.pot
+*.pyc
+local_settings.py
