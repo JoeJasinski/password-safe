@@ -4,7 +4,7 @@ from safe import crypto
 from django_extensions.db.fields import AutoSlugField
 from safe.exceptions import *
 from mptt.models import MPTTModel, TreeForeignKey
-from safe.fields import HashField, HashMixin
+
 
 class MetaInfoMixin(models.Model):
     created = models.DateTimeField(auto_now_add=True)
@@ -14,10 +14,10 @@ class MetaInfoMixin(models.Model):
         abstract = True
 
 
-class PublicKey(HashMixin, MetaInfoMixin, models.Model):
+class PublicKey(MetaInfoMixin, models.Model):
     user = models.OneToOneField('auth.User')
     text = models.TextField(blank=True, null=True)
-    hash = HashField(original="text")
+    hash = models.CharField(max_length=40, blank=True, null=True)
     
     def __unicode__(self):
         return "%s" % (self.user)

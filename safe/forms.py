@@ -1,3 +1,4 @@
+import hashlib
 from django import forms
 from safe import crypto
 from safe.exceptions import *
@@ -23,6 +24,8 @@ class KeyField(forms.Field):
         return value
 
 
+_hashit = lambda s: hashlib.sha1(s).hexdigest()
+
 class CreatePublicKeyForm(forms.Form):
     pubkey = KeyField()
 
@@ -42,6 +45,15 @@ class CreatePublicKeyForm(forms.Form):
                 field.widget.attrs['class'] += ' form-control'
             else:
                 field.widget.attrs.update({'class':'form-control'})
+
+    @classmethod
+    def calculate_hash(cls, value):
+        return _hashit(value)
+
+    def clean(self):
+        cleaned_data = super(CreatePublicKeyForm, self).clean()
+        cleaned_data['hash'] = CreatePublicKeyForm.calculate_hash(cleaned_data['pubkey'])
+        return cleaned_data
 
 
 class CreateUpdateCredentialForm(forms.ModelForm):
