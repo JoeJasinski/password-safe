@@ -3,13 +3,14 @@ from Crypto.PublicKey import RSA
 from base64 import b64decode
 from safe.exceptions import *
 
+
 def get_key(text):
     try:
         key = RSA.importKey(text)
     except ValueError, e:
         raise EncryptionImportKeyException(e.message)
     key_cipher = PKCS1_OAEP.new(key)
-    return key_cipher 
+    return key_cipher
 
 
 def encrypt(public_key, clear_text):
@@ -29,12 +30,12 @@ def decrypt(private_key_string, ciphertext):
     return decrypted string
     '''
     try:
-        private_key = RSA.importKey(private_key_string) 
+        private_key = RSA.importKey(private_key_string)
     except ValueError, e:
         raise DecryptionImportKeyException(e.message)
-    private_key = PKCS1_OAEP.new(private_key) 
+    private_key = PKCS1_OAEP.new(private_key)
     try:
-        decrypted = private_key.decrypt(b64decode(ciphertext)) 
+        decrypted = private_key.decrypt(b64decode(ciphertext))
     except TypeError, e:
         raise DecryptionBase64Exception(e.message)
     return decrypted

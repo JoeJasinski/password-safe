@@ -30,34 +30,34 @@ class JSONResponseMixin(object):
 
 
 class AddKeyIndexView(TemplateView):
-    template_name="safe/addkey.html"
+    template_name = "safe/addkey.html"
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(AddKeyIndexView, self).dispatch(*args, **kwargs)
-    
+
     def get_context_data(self, **kwargs):
         return_value = super(AddKeyIndexView, self).get_context_data(**kwargs)
         domain = Site.objects.get_current().domain
         return_value['form'] = CreatePublicKeyForm(show_privkey=True)
         return_value['url_key_add'] = reverse('safe-key-add')
         return return_value
-    
+
 
 class CreateKeyView(JSONResponseMixin, TemplateView):
-    http_method_names = ['post',]
+    http_method_names = ['post']
     form_class = CreatePublicKeyForm
 
     @method_decorator(csrf_exempt)
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(CreateKeyView, self).dispatch(*args, **kwargs)
-    
+
     def post(self, request, *args, **kwargs):
         context = {}
         form = self.form_class(data=request.POST)
         if form.is_valid():
-            user = request.user 
+            user = request.user
             key, created = PublicKey.objects.get_or_create(user=user)
             key.text = form.cleaned_data['pubkey']
             key.hash = form.cleaned_data['hash']
@@ -74,7 +74,7 @@ class CreateCredentialIndexView(TemplateView):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(CreateCredentialIndexView, self).dispatch(*args, **kwargs)
-    
+
     def get_context_data(self, **kwargs):
         return_value = super(CreateCredentialIndexView, self).get_context_data(**kwargs)
         domain = Site.objects.get_current().domain
@@ -84,10 +84,10 @@ class CreateCredentialIndexView(TemplateView):
 
 
 class CreateUpdateCredentialView(JSONResponseMixin, TemplateView):
-    
-    http_method_names = ['post',]
+
+    http_method_names = ['post']
     form_class = CreateUpdateCredentialForm
-    
+
     @method_decorator(csrf_exempt)
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
@@ -97,7 +97,7 @@ class CreateUpdateCredentialView(JSONResponseMixin, TemplateView):
         context = {}
         instance = None
         edit = bool(slug)
-        if slug: 
+        if slug:
             instance = get_object_or_404(Credential, slug=slug)
         form = self.form_class(data=request.POST, instance=instance, edit=edit)
         if form.is_valid():
@@ -105,9 +105,11 @@ class CreateUpdateCredentialView(JSONResponseMixin, TemplateView):
             if not edit:
                 encrypted_secret = form.cleaned_data['secret']
                 credential.get_or_create_encrypted_usersecret(request.user, encrypted_secret)
-            context.update({'message':"Credential Added","url":reverse('safe-credential-edit', args=[credential.slug])})
+            context.update({
+                'message': "Credential Added",
+                "url": reverse('safe-credential-edit', args=[credential.slug])})
         else:
-            context.update({'errors':form.errors})
+            context.update({'errors': form.errors})
         return self.render_to_response(context)
 
 
@@ -116,12 +118,13 @@ class CredentialOwnershipMixin(object):
     def get_queryset(self):
         return self.model._default_manager.get_user_credentials(user=self.request.user)
 
+
 class ListCredentialView(CredentialOwnershipMixin, ListView):
-    
+
     model = Credential
     http_method_names = [u'get',]
     template_name = "safe/listcredential.html"
-    
+
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(ListCredentialView, self).dispatch(*args, **kwargs)
@@ -131,12 +134,12 @@ class ListCredentialView(CredentialOwnershipMixin, ListView):
 
 
 class UpdateCredentialView(CredentialOwnershipMixin, DetailView):
-    
+
     model = Credential
     http_method_names = [u'get']
     template_name = "safe/updatecredential.html"
     form_class = CreateUpdateCredentialForm
-    
+
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(UpdateCredentialView, self).dispatch(*args, **kwargs)
@@ -161,10 +164,10 @@ class ViewCredentialSecretView(JSONResponseMixin, CredentialOwnershipMixin, Deta
         return return_value
 
     def get(self, request, *args, **kwargs):
-        context = {'message':'Key returned', 
-                   'encrypted_secret':self.get_object().get_usersecret_cyphertext(request.user)}
+        context = {'message': 'Key returned',
+                   'encrypted_secret': self.get_object().get_usersecret_cyphertext(request.user)}
         return self.render_to_response(context)
-    
+
     def get_context_object_name(self, obj):
         return "credential"
 
@@ -200,15 +203,14 @@ class ListTagsView(JSONResponseMixin, CredentialOwnershipMixin, TemplateView):
     def dispatch(self, request, *args, **kwargs):
         return_value = super(ListTagsView, self).dispatch(request, *args, **kwargs)
         return return_value
-    
+
     def get_context_object_name(self, obj):
-        return "credentials" 
-    
+        return "credentials"
+
     def get(self, request, *args, **kwargs):
         form = SearchTagField(data=request.GET)
         if form.is_valid():
             q = form.cleaned_data.get('q', "")
-        context = {'message':'Tags returned', 
-                   'tags':['red', 'blue', 'green', 'yellow']}
+        context = {'message': 'Tags returned',
+                   'tags': ['red', 'blue', 'green', 'yellow']}
         return self.render_to_response(context)
-      

@@ -20,12 +20,12 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'psafe.db',                      
+        'NAME': 'psafe.db',
         # The following settings are not used with sqlite3:
         'USER': 'psafe',
         'PASSWORD': '',
-        'HOST': 'localhost',  
-        'PORT': '',          
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
 
@@ -42,7 +42,7 @@ TIME_ZONE = 'America/Chicago'
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
-LANGUAGE_COOKIE_NAME = "language" 
+LANGUAGE_COOKIE_NAME = "language"
 
 SITE_ID = 1
 
@@ -59,7 +59,7 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = os.path.join(HTDOCS_DIR,  'media') 
+MEDIA_ROOT = os.path.join(HTDOCS_DIR,  'media')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -103,14 +103,14 @@ TEMPLATE_LOADERS = (
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
-  'django.contrib.auth.context_processors.auth', 
-  'django.core.context_processors.debug', 
-  'django.core.context_processors.i18n', 
-  'django.core.context_processors.media', 
-  'django.core.context_processors.static', 
-  'django.core.context_processors.tz', 
+  'django.contrib.auth.context_processors.auth',
+  'django.core.context_processors.debug',
+  'django.core.context_processors.i18n',
+  'django.core.context_processors.media',
+  'django.core.context_processors.static',
+  'django.core.context_processors.tz',
   'django.contrib.messages.context_processors.messages',
-  'psafe.score.context_processors.site', 
+  'psafe.score.context_processors.site',
 )
 
 
@@ -149,11 +149,9 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'django_extensions',
     'mptt',
-    'south', 
     'safe',
 
-    'gunicorn', 
-    'psafe.score', 
+    'psafe.score',
 )
 
 # A sample logging configuration. The only tangible logging
